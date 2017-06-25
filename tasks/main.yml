@@ -1,0 +1,26 @@
+---
+- name: Add Kibana repository
+  yum_repository:
+    name: kibana-5.x
+    description: Kibana repository for 5.x packages
+    baseurl: https://artifacts.elastic.co/packages/5.x/yum
+    gpgkey: https://artifacts.elastic.co/GPG-KEY-elasticsearch
+- name: Add Kibana key to keystore
+  rpm_key:
+    state: present
+    key: https://artifacts.elastic.co/GPG-KEY-elasticsearch
+- name: Install Kibana
+  yum:
+    name: kibana
+    state: latest
+- lineinfile:
+    path: /etc/kibana/kibana.yml
+    regexp: '^#server.host: "localhost"'
+    backrefs: yes
+    line: 'server.host: "{{ansible_fqdn}}"'
+- name: Start kibana
+  systemd: 
+    name: kibana
+    state: restarted
+    daemon_reload: yes
+    enabled: yes
