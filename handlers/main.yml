@@ -1,0 +1,3 @@
+---
+- name: "notify kibana for restart"
+  service: name=kibana state=restarted enabled=yes

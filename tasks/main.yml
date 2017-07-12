@@ -18,9 +18,4 @@
     regexp: '^#server.host: "localhost"'
     backrefs: yes
     line: 'server.host: "{{ansible_fqdn}}"'
-- name: Start kibana
-  systemd: 
-    name: kibana
-    state: restarted
-    daemon_reload: yes
-    enabled: yes
+  notify: "notify kibana for restart"
