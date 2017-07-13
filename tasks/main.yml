@@ -13,9 +13,16 @@
   yum:
     name: kibana
     state: latest
+  notify: "notify kibana for restart"
 - lineinfile:
     path: /etc/kibana/kibana.yml
     regexp: '^#server.host: "localhost"'
     backrefs: yes
     line: 'server.host: "{{ansible_fqdn}}"'
+  notify: "notify kibana for restart"
+- lineinfile:
+    path: /etc/kibana/kibana.yml
+    regexp: '^# elasticsearch.url: "http://localhost:9200"'
+    backrefs: yes
+    line: 'elasticsearch.url: "http://{{ansible_fqdn}}:9200"'
   notify: "notify kibana for restart"
