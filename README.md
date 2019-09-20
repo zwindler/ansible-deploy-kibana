@@ -1,2 +1,2 @@
 # ansible-deploy-kibana
- Ansible role to install of kibana (the official ansible role install legacy 2.X) 
+Archived => official github now support latests versions https://github.com/elastic/ansible-elasticsearch
