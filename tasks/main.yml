@@ -1,17 +1,24 @@
 ---
-- name: Add elasticsearch repository
-  yum_repository:
-    name: elasticsearch-5.x
-    description: elasticsearch repository for 5.x packages
-    baseurl: https://artifacts.elastic.co/packages/5.x/yum
-    gpgkey: https://artifacts.elastic.co/GPG-KEY-elasticsearch
-- name: Add Kibana key to keystore
-  rpm_key:
+- name: "Install prerequisites"
+  apt: 
+    name: "{{item}}"
+    state: latest
+  loop:
+    - apt-transport-https
+- name: "Add Elasticstack repository key"
+  apt_key:
+    url: "https://artifacts.elastic.co/GPG-KEY-elasticsearch"
     state: present
-    key: https://artifacts.elastic.co/GPG-KEY-elasticsearch
-- name: Install Kibana
-  yum:
+- name: "Add Elasticstack repository"
+  apt_repository:
+    repo: "deb https://artifacts.elastic.co/packages/7.x/apt stable main"
+    state: present
+#Weird bug when installing Kibana in a LXC container with apt instead of apt-get
+#See https://github.com/elastic/kibana/issues/17176
+- name: "Install Kibana"
+  apt:
     name: kibana
+    force_apt_get: yes
     state: latest
   notify: "notify kibana for restart"
 - lineinfile:
@@ -26,3 +33,22 @@
     backrefs: yes
     line: 'elasticsearch.url: "http://{{ansible_fqdn}}:9200"'
   notify: "notify kibana for restart"
+- name: "Configure X-Pack"
+  lineinfile:
+    path: /etc/kibana/kibana.yml
+    state: present
+    line: "xpack.security.enabled: true"
+  notify: "notify kibana for restart"
+- name: "Add elastic username for kibana"
+  lineinfile:
+    path: /etc/kibana/kibana.yml
+    state: present
+    line: "elasticsearch.username: kibana"
+  notify: "notify kibana for restart"
+# /usr/share/elasticsearch/bin/elasticsearch-setup-passwords
+#- name: "Add elastic password for kibana"
+#  lineinfile:
+#    path: /etc/kibana/kibana.yml
+#    state: present
+#    line: "elasticsearch.password:  "<pwd>"
+#  notify: "notify kibana for restart"
